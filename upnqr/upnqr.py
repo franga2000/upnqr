@@ -1,6 +1,7 @@
 import datetime
-import re
 import math
+import re
+
 import PIL.Image
 from pydantic import validator
 from pydantic.dataclasses import dataclass
@@ -108,7 +109,7 @@ def upn_string(data):
 
 def make_from_string(string, mask=-1):
     """Creates a QR object from the string formatted by upn_string()."""
-    segments = [QrSegment.make_eci(4), QrSegment.make_bytes(string.encode(ENCODING))]
+    segments = [QrSegment.make_eci(4), QrSegment.make_bytes(string.encode(ENCODING, errors='ignore'))]
     return QrCode.encode_segments(
         segments,
         ecl=QrCode.Ecc.MEDIUM,
@@ -153,19 +154,24 @@ def to_svg(qr, border: int = 0) -> str:
         qr: The code to transform.
         border: The number of additional (white) border modules around the QR code.
     """
-    if border < 0:
-        raise ValueError("Border must be non-negative")
-    to_paths = lambda x, y, module: f"M{x+border},{y+border}h1v1h-1z" if module else ''
-    transformed = transform(qr, to_paths, border)
-    parts = [elm for line in transformed for elm in line if elm]
-    box_size = qr.get_size() + border*2
+    box_size = qr.get_size() + border * 2
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 {box_size} {box_size}" stroke="none">
         <rect width="100%" height="100%" fill="#FFFFFF"/>
-        <path d="{' '.join(parts)}" fill="#000000"/>
+        <path d="{to_svg_path(qr)}" fill="#000000"/>
 </svg>
 """
+
+
+def to_svg_path(qr, border: int = 0, x0=0, y0=0, s=1):
+    if border < 0:
+        raise ValueError("Border must be non-negative")
+    to_paths = lambda x, y, module: f"M{x0+x*s+border},{y0+y*s+border}h{s}v{s}h-1z" if module else ''
+    transformed = transform(qr, to_paths, border)
+    parts = [elm for line in transformed for elm in line if elm]
+    return ' '.join(parts)
+
 
 def to_pil(qr, border=0):
     """Transforms a QR object to a PIL Image. The resulting image has one pixel per QR
