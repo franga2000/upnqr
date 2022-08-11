@@ -167,7 +167,7 @@ def to_svg(qr, border: int = 0) -> str:
 def to_svg_path(qr, border: int = 0, x0=0, y0=0, s=1):
     if border < 0:
         raise ValueError("Border must be non-negative")
-    to_paths = lambda x, y, module: f"M{x0+x*s+border},{y0+y*s+border}h{s}v{s}h-1z" if module else ''
+    to_paths = lambda x, y, module: f"M{x0+x*s+border},{y0+y*s+border}h{s}v{s}h-{s}z" if module else ''
     transformed = transform(qr, to_paths, border)
     parts = [elm for line in transformed for elm in line if elm]
     return ' '.join(parts)
