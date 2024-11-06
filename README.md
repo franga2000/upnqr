@@ -1,32 +1,66 @@
-### upnqr
+# upnqr
+
+[README is also available in English](./README-EN.md)
 
 Python knjižnica za generiranje QR kod za Univerzalni Plačilni Nalog (UPN).
 
-Specifikacije:
+## Specifikacija
 
-https://www.zbs-giz.si/standardi-in-prirocniki/
+ - [Standard in pomožna dokumentacija (zip)](https://www.zbs-giz.si/wp-content/uploads/2021/07/objava_dokumentacije_UPN_QR-2016-12-15.zip)
+ - [Seznam kod namenov (zip)](https://www.zbs-giz.si/wp-content/uploads/2021/07/Sifrant_kod_namenov_placil_javen.zip)
+ - [Pravila za uporabo referenc SI (pdf)](https://www.zbs-giz.si/wp-content/uploads/2023/12/Pravila-za-oblikovanje-in-uporabo-standardiziranih-referenc-pri-opravljanju-placilnih-storitev-verzija-1.4.pdf)
+ - [Združenje Bank Slovenije - Standardi in priročniki (splet)](https://www.zbs-giz.si/standardi-in-prirocniki/)
 
-(direktna povezava: https://www.zbs-giz.si/wp-content/uploads/2021/07/objava_dokumentacije_UPN_QR-2016-12-15.zip)
+## Namestitev
 
-Prvotne povezave, nedostopne:
+```sh
+pip install git+https://github.com/franga2000/upnqr.git#egg=upnqr
+```
 
-~~https://upn-qr.si/uploads/files/Tehnicni%20standard%20UPN%20QR.pdf~~
+## Uporaba
 
-~~https://www.upn-qr.si/uploads/files/NavodilaZaProgramerjeUPNQR.pdf~~
+Priprava podatkov:
 
+```python
+import upnqr
 
-~
+data = upnqr.Data(
+ placnik = upnqr.Placnik(
+        ime='Ime Plačnika',
+        ulica='Plačnikova ulica 1',
+        kraj='Kraj Plačnika'),
+    prejemnik = upnqr.Prejemnik(
+        ime='Ime Prejemnika',
+        ulica='Prejemnikova ulica 1',
+        kraj='Kraj Prejemnika',
+        iban='SI56043020002997963'),
+    znesek = 42.00,
+    koda_namena = 'COST',
+    namen_placila = 'Namen plačila',
+    rok_placila = '2022-05-01',
+    referenca = 'SI1212345678909'
+)
 
-Python library for QR code generation for UPN payment forms.
+qr = upnqr.make_from_data(data)
+```
 
-Specifications:
+Izpis v različnih oblikah:
 
-https://www.zbs-giz.si/en/standards/
+```python
+# V rastrski obliki (slika)
+img = upnqr.to_pil(qr)
+img.save('out.png')
 
-(direct link: https://www.zbs-giz.si/wp-content/uploads/2021/10/EN_Tehnicni_standard_UPN_QR.pdf)
+# V vektorski obliki (SVG)
+svg = upnqr.to_svg(qr)
+with open('out.svg', 'w') as f:
+    f.write(svg)
 
-Original links, now dead:
+# V vektorski obliki (SVG path - za vstavljanje v obstoječ SVG)
+path_spec = upnqr.to_svg_path(qr)
+path_el = f'<path d="{path_spec}" fill="#000000"/>'
 
-~~https://upn-qr.si/uploads/files/EN_Tehnicni%20standard%20UPN%20QR.pdf~~
-
-~~https://upn-qr.si/uploads/files/EN_NavodilaZaProgramerjeUPNQR.pdf~~
+# V besedilni obliki (npr. za izpis v terminalu, uporablja Unicode simbole za bela polja)
+txt = to_text(qr)
+print(txt)
+```
