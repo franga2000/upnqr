@@ -1,0 +1,18 @@
+[project]
+name = "upnqr"
+version = "0.1.0"
+description = "Generate UPN QR payment codes"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pydantic",
+    "qrcodegen",
+    "Pillow",
+]
+
+[project.urls]
+Repository = "https://github.com/franga2000/upnqr"
